@@ -59,7 +59,7 @@ scp -q -i "${BACKUP_SSHKEY}" \
     "root@${BACKUP_CLIENT}:/tmp/${BACKUP_VOLUME}.patterns" 
 
 export BORG_PASSPHRASE
-ssh -o SendEnv='BORG_PASSPHRASE' \
+ssh -o SendEnv='BORG_PASSPHRASE' -o StrictHostKeyChecking='accept-new' \
   -i "${BACKUP_SSHKEY}" -A \
   -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}" \
 "borg create \

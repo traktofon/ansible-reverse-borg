@@ -3,7 +3,7 @@
 # all settings can be overridden in client config
 
 # name or IP by which this machine can be reached from the client
-# BACKUP_SERVER='...'
+BACKUP_SERVER='{{ ansible_host }}'
 
 # path to ssh key which is used to log in to the client
 BACKUP_SSHKEY='{{ config_directory }}/sshid_borg'

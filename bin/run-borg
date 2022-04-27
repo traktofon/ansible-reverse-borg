@@ -56,7 +56,7 @@ trap cleanup SIGINT SIGTERM EXIT
 ssh-add "${CLIENT_CONFIG_DIR}/id_rsa" 2>/dev/null
 
 export BORG_PASSPHRASE
-ssh -o SendEnv='BORG_PASSPHRASE' \
+ssh -o SendEnv='BORG_PASSPHRASE' -o StrictHostKeyChecking='accept-new' \
   -i "${BACKUP_SSHKEY}" -A \
   -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}" \
 "borg ${BORG_ARGS} \

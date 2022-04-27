@@ -13,6 +13,7 @@
       package:
         name:
           - openssl
+          - rsync
         state: present
 
     - name: ensure borg group exists
@@ -35,6 +36,15 @@
       loop:
         - "{{ config_directory }}"
         - "{{ config_directory }}/etc"
+
+    - name: copy bin directory to server
+      synchronize:
+        src: bin
+        dest: "{{ config_directory }}/"
+        archive: no
+        recursive: yes
+        links: yes
+        perms: yes
 
     - name: create ssh keypair for logging into the backup clients
       openssh_keypair:

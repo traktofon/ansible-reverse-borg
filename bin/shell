@@ -53,7 +53,7 @@ ssh-add "${CLIENT_CONFIG_DIR}/id_rsa"
 
 export BORG_REPO="${BACKUP_USER}@${BACKUP_SERVER}:${BACKUP_REPO}"
 export BORG_PASSPHRASE
-ssh -o SendEnv='BORG_*' \
+ssh -o SendEnv='BORG_*' -o StrictHostKeyChecking='accept-new' \
   -i "${BACKUP_SSHKEY}" -A \
   -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}"
 
