@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -e
+
+function usage {
+    cat <<EOF >&2 
+Usage: shell <volume>
+    Configuration for <volume> must exist.
+EOF
+    exit 1
+}
+
+# load config
+MY_DIR=$(dirname $(dirname $(realpath "$0")))
+MY_CONFIG="${MY_DIR}/etc/backup.conf"
+if [ ! -r "${MY_CONFIG}" ]; then
+    echo "ERROR: configuration file '${MY_CONFIG}' missing" >&2
+    exit 1
+fi
+. "${MY_CONFIG}"
+# BACKUP_SERVER
+# BACKUP_SSHKEY
+
+
+# parse arguments
+BACKUP_VOLUME="$1"
+[ -z "${BACKUP_VOLUME}" ] && usage
+shift
+
+
+CLIENT_CONFIG_DIR="${MY_DIR}/${BACKUP_VOLUME}"
+if [ ! -r "${CLIENT_CONFIG_DIR}/config" ]; then
+    echo "ERROR: client configuration in '${CLIENT_CONFIG_DIR}' missing" >&2
+    exit 1
+fi
+
+source "${CLIENT_CONFIG_DIR}/config"
+# BACKUP_CLIENT
+# BACKUP_PORT
+# BACKUP_USER
+# BACKUP_SET
+# BACKUP_REPO
+# BORG_PASSPHRASE (optional)
+
+if [ ! -d "${BACKUP_REPO}" ]; then
+    echo "WARNING: repository '${BACKUP_REPO}' missing" >&2
+fi
+
+eval $(ssh-agent -s -t 3600)
+cleanup () { eval $(ssh-agent -k) ; }
+trap cleanup SIGINT SIGTERM EXIT
+ssh-add "${CLIENT_CONFIG_DIR}/id_rsa"
+
+export BORG_REPO="${BACKUP_USER}@${BACKUP_SERVER}:${BACKUP_REPO}"
+export BORG_PASSPHRASE
+ssh -o SendEnv='BORG_*' \
+  -i "${BACKUP_SSHKEY}" -A \
+  -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}"
+

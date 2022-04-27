@@ -1,0 +1,40 @@
+#!/bin/bash
+
+function usage {
+    cat <<EOF >&2 
+Usage: run-all <group> [ <borg-arg> ... ]
+    Configuration for <group> must exist.
+    Runs borg create & borg prune for all entries in <group>.
+EOF
+    exit 1
+}
+
+# parse arguments
+GROUP="$1"
+[ -z "${GROUP}" ] && usage
+shift
+
+ARGS="$@"
+
+export PATH="$PATH:/usr/local/bin"
+
+# load config
+MY_DIR=$(dirname $(dirname $(realpath "$0")))
+MY_CONFIG="${MY_DIR}/etc/${GROUP}.conf"
+if [ ! -r "${MY_CONFIG}" ]; then
+    echo "ERROR: configuration file '${MY_CONFIG}' missing" >&2
+    exit 1
+fi
+. "${MY_CONFIG}"
+# VOLUMES
+
+
+for volume in "${VOLUMES[@]}"; do
+   echo -n "### ${volume} backup start at "; date
+   "${MY_DIR}/bin/run-backup" "${volume}" "${ARGS[@]}" 2>&1 | headtail -t 500 -b 500
+   echo -n "### ${volume} prune start at "; date
+   "${MY_DIR}/bin/run-prune" "${volume}" "${ARGS[@]}"
+   echo -n "### ${volume} finish at "; date
+   echo
+done
+
