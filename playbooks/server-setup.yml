@@ -20,6 +20,13 @@
         name: borg
         state: present
 
+    - name: ensure operator account exists
+      user:
+        name: "{{ backup_operator_account }}"
+        comment: Borg Operator Account
+        create_home: yes
+        shell: /bin/bash
+
     - name: set up directory for storing backups
       file:
         path: "{{ backup_directory }}"
@@ -31,6 +38,8 @@
     - name: set up config directories
       file:
         path: "{{ item }}"
+        owner: "{{ backup_operator_account }}"
+        group: "{{ backup_operator_account }}"
         state: directory
       loop:
         - "{{ config_directory }}"
@@ -40,15 +49,15 @@
       synchronize:
         src: "../bin"
         dest: "{{ config_directory }}/"
-        archive: no
-        recursive: yes
-        links: yes
-        perms: yes
-        times: yes
+        archive: yes
+        rsync_opts:
+          - "--chown={{ backup_operator_account }}:{{ backup_operator_account }}"
 
     - name: create ssh keypair for logging into the backup clients
       openssh_keypair:
         path: "{{ config_directory }}/sshid_borg"
+        owner: "{{ backup_operator_account }}"
+        group: "{{ backup_operator_account }}"
         type: rsa
         state: present
         force: no
@@ -57,9 +66,13 @@
       template:
         src: "templates/backup.conf.j2"
         dest: "{{ config_directory}}/etc/backup.conf"
+        owner: "{{ backup_operator_account }}"
+        group: "{{ backup_operator_account }}"
 
     - name: set up group config file
       copy:
         src: "templates/ALL.conf"
         dest: "{{ config_directory}}/etc/ALL.conf"
+        owner: "{{ backup_operator_account }}"
+        group: "{{ backup_operator_account }}"
         force: no

@@ -11,11 +11,15 @@
 - name: create config directory for volume
   file:
     path: "{{ config_directory }}/{{ item.name }}"
+    owner: "{{ backup_operator_account }}"
+    group: "{{ backup_operator_account }}"
     state: directory
 
 - name: create ssh keypair for volume
   openssh_keypair:
     path: "{{ config_directory }}/{{ item.name }}/id_rsa"
+    owner: "{{ backup_operator_account }}"
+    group: "{{ backup_operator_account }}"
     type: rsa
     state: present
     force: no
@@ -45,6 +49,8 @@
   template:
     src: templates/config.j2
     dest: "{{ config_directory }}/{{ item.name }}/config"
+    owner: "{{ backup_operator_account }}"
+    group: "{{ backup_operator_account }}"
     mode: '0600'
     force: no
 
@@ -52,6 +58,8 @@
   copy:
     src: templates/patterns
     dest: "{{ config_directory }}/{{ item.name }}/patterns"
+    owner: "{{ backup_operator_account }}"
+    group: "{{ backup_operator_account }}"
     force: no
 
 - name: add volume to group config file
@@ -60,4 +68,6 @@
     line: "  {{ item.name }}"
     insertafter: '^VOLUMES='
     state: present
+    owner: "{{ backup_operator_account }}"
+    group: "{{ backup_operator_account }}"
 

@@ -30,6 +30,7 @@
     - set_fact:
         backup_directory: "{{ hostvars['borgsrv'].backup_directory }}"
         config_directory: "{{ hostvars['borgsrv'].config_directory }}"
+        backup_operator_account: "{{ hostvars['borgsrv'].backup_operator_account }}"
 
   tasks:
     - delegate_to: borgsrv
@@ -65,7 +66,7 @@
         user: root
         key: "{{ hostvars['borgsrv'].server_public_key }}"
         key_options: "from=\"{{ hostvars['borgsrv'].ansible_host }}\",restrict,agent-forwarding,pty"
-        comment: "borg@{{ hostvars['borgsrv'].ansible_host }}"
+        comment: "{{ hostvars['borgsrv'].backup_operator_account }}@{{ hostvars['borgsrv'].ansible_host }}"
 
     - name: allow BORG environment variables to be passed via ssh
       lineinfile:
