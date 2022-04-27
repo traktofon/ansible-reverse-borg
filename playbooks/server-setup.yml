@@ -3,7 +3,6 @@
 - name: initial setup on server
   hosts: servers
   become: yes
-  tags: server
 
   roles:
     - borgbackup-exec
@@ -39,7 +38,7 @@
 
     - name: copy bin directory to server
       synchronize:
-        src: bin
+        src: "../bin"
         dest: "{{ config_directory }}/"
         archive: no
         recursive: yes

@@ -1,0 +1,84 @@
+---
+- name: gather server information for clients
+  hosts: clients
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: register server's public key
+      delegate_to: borgsrv
+      block:
+        - command:
+            cmd: "cat {{ hostvars['borgsrv'].config_directory }}/sshid_borg.pub"
+          register: ssh_public_key
+          changed_when: false
+        - set_fact:
+            server_public_key: "{{ ssh_public_key.stdout }}"
+          delegate_facts: true
+          changed_when: false
+      run_once: true
+      check_mode: no
+
+
+- name: setup for each client, on server
+  hosts: clients
+  become: yes
+  gather_facts: no
+  serial: 1
+
+  pre_tasks:
+    - set_fact:
+        backup_directory: "{{ hostvars['borgsrv'].backup_directory }}"
+        config_directory: "{{ hostvars['borgsrv'].config_directory }}"
+
+  tasks:
+    - delegate_to: borgsrv
+      block:
+        - name: create user account for client on backup server
+          user:
+            name: "borg-{{ inventory_hostname }}"
+            group: borg
+            comment: "Borg Backup for {{ inventory_hostname }}"
+            create_home: yes
+
+        - name: perform server tasks for each client volume
+          include_tasks: volume-tasks.yml
+          loop: "{{ volumes }}"
+
+
+- name: setup for each client, on client
+  hosts: clients
+  become: yes
+
+  roles:
+    - borgbackup-exec
+
+  handlers:
+    - name: reload sshd
+      service:
+        name: sshd
+        state: reloaded
+
+  tasks:
+    - name: add server's public key to authorized_keys
+      authorized_key:
+        user: root
+        key: "{{ hostvars['borgsrv'].server_public_key }}"
+        key_options: "from=\"{{ hostvars['borgsrv'].ansible_host }}\",restrict,agent-forwarding,pty"
+        comment: "borg@{{ hostvars['borgsrv'].ansible_host }}"
+
+    - name: allow BORG environment variables to be passed via ssh
+      lineinfile:
+        path: "/etc/ssh/sshd_config"
+        line: 'AcceptEnv BORG_*'
+        insertafter: "^AcceptEnv"
+        state: present
+      notify: reload sshd
+
+    - name: ensure repos are initialized
+      delegate_to: borgsrv
+      loop: "{{ volumes }}"
+      command:
+        chdir: "{{ hostvars['borgsrv'].config_directory }}"
+        cmd: "bin/run-borg {{ item.name }} init -e authenticated-blake2"
+        creates: "{{ hostvars['borgsrv'].backup_directory }}/{{ item.name }}/config"
