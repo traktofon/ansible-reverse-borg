@@ -1,0 +1,12 @@
+---
+# tasks file for borgbackup-exec
+- name: "install borg binary (v{{ borg_version }}, {{ borg_arch }})"
+  get_url:
+    url: "https://github.com/borgbackup/borg/releases/download/{{ borg_version }}/borg-{{ borg_arch }}"
+    dest: "{{ target_directory }}/borg"
+    owner: root
+    group: root
+    mode: '0755'
+    force: yes
+    checksum: "{{ borg_checksum }}"
+    timeout: 30

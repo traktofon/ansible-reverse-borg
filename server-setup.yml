@@ -5,21 +5,10 @@
   become: yes
   tags: server
 
-  vars_files:
-    - vars/vars.yml
+  roles:
+    - borgbackup-exec
 
   tasks:
-    - name: install borg binary
-      get_url:
-        url: "https://github.com/borgbackup/borg/releases/download/{{ borg_version }}/borg-linux64"
-        dest: /usr/local/bin/borg
-        owner: root
-        group: root
-        mode: '0755'
-        force: yes
-        checksum: "{{ borg_checksum }}"
-        timeout: 30
-        
     - name: install packages
       package:
         name:
