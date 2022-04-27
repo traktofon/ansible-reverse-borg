@@ -1,0 +1,65 @@
+---
+- import_playbook: server-setup.yml
+
+- name: gather server information for clients
+  hosts: clients
+  become: yes
+  gather_facts: no
+  tags: client
+
+  vars_files:
+    - vars/vars.yml
+
+  tasks:
+    - name: register server's public key
+      delegate_to: borgsrv
+      block:
+        - command:
+            cmd: "cat {{ config_directory }}/sshid_borg.pub"
+          register: ssh_public_key
+          changed_when: false
+        - set_fact:
+            ssh_public_key: "{{ ssh_public_key.stdout }}"
+          delegate_facts: true
+          changed_when: false
+      run_once: true
+
+
+- name: setup for each client, on server
+  hosts: clients
+  become: yes
+  gather_facts: no
+  serial: 1
+  tags: client
+
+  vars_files:
+    - vars/vars.yml
+    - vars/clients.yml
+
+  tasks:
+    - delegate_to: borgsrv
+      block:
+        - name: create user account for client on backup server
+          user:
+            name: "borg-{{ inventory_hostname }}"
+            group: borg
+            comment: "Borg Backup for {{ inventory_hostname }}"
+            create_home: yes
+
+        - name: perform server tasks for each client volume
+          include_tasks: volume-tasks.yml
+          loop: "{{ backup_clients[inventory_hostname].volumes }}"
+
+ 
+- name: setup for each client, on client
+  hosts: clients
+  become: yes
+  tags: client
+
+  vars_files:
+    - vars/vars.yml
+
+  tasks:
+    - name: add server's public key to authorized_keys
+      debug:
+        msg: "{{ hostvars['borgsrv']['ssh_public_key'] }}"

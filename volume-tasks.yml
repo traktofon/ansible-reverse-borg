@@ -1,0 +1,54 @@
+# volume-tasks.yml
+---
+- name: create backup directory for volume
+  file:
+    path: "{{ backup_directory }}/{{ item.name }}"
+    state: directory
+    owner: "borg-{{ inventory_hostname }}"
+    group: borg
+    mode: '0700'
+
+- name: create config directory for volume
+  file:
+    path: "{{ config_directory }}/{{ item.name }}"
+    state: directory
+
+- name: create ssh keypair for volume
+  openssh_keypair:
+    path: "{{ config_directory }}/{{ item.name }}/id_rsa"
+    type: rsa
+    state: present
+    force: no
+
+- name: register volume's public key
+  command:
+    cmd: "cat {{ config_directory }}/{{ item.name }}/id_rsa.pub"
+  changed_when: false
+  register: volume_public_key
+
+- name: append volume's public key to backup account's authorized_keys
+  authorized_key:
+    user: "borg-{{ inventory_hostname }}"
+    key: "{{ volume_public_key.stdout }}"
+    key_options: 'from="{{ backup_clients[inventory_hostname].address }}",command="borg serve --restrict-to-path {{ backup_directory }}/{{ item.name }}",restrict'
+    comment: "{{ item.name }}"
+
+- name: generate random password for volume
+  command:
+    cmd: 'openssl rand -hex 16'
+  changed_when: false
+  register: volume_password
+
+- name: set up config file for volume
+  template:
+    src: templates/config.j2
+    dest: "{{ config_directory }}/{{ item.name }}/config"
+    mode: '0600'
+    force: no
+
+- name: set up default exclude patterns for volume
+  copy:
+    src: templates/patterns
+    dest: "{{ config_directory }}/{{ item.name }}/patterns"
+    force: no
+

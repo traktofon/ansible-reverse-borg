@@ -1,0 +1,61 @@
+# server-setup.yml
+---
+- name: initial setup on server
+  hosts: servers
+  become: yes
+  tags: server
+
+  vars_files:
+    - vars/vars.yml
+
+  tasks:
+    - name: install borg binary
+      get_url:
+        url: "https://github.com/borgbackup/borg/releases/download/{{ borg_version }}/borg-linux64"
+        dest: /usr/local/bin/borg
+        owner: root
+        group: root
+        mode: '0755'
+        force: yes
+        checksum: "{{ borg_checksum }}"
+        timeout: 30
+        
+    - name: install packages
+      package:
+        name:
+          - openssl
+        state: present
+
+    - name: ensure borg group exists
+      group:
+        name: borg
+        state: present
+
+    - name: set up directory for storing backups
+      file:
+        path: "{{ backup_directory }}"
+        state: directory
+        owner: root
+        group: borg
+        mode: '1770'
+
+    - name: set up config directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ config_directory }}"
+        - "{{ config_directory }}/etc"
+
+    - name: create ssh keypair for logging into the backup clients
+      openssh_keypair:
+        path: "{{ config_directory }}/sshid_borg"
+        type: rsa
+        state: present
+        force: no
+    
+    - name: set up server config file
+      template:
+        src: "templates/backup.conf.j2"
+        dest: "{{ config_directory}}/etc/backup.conf"
+

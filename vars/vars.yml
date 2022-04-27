@@ -1,0 +1,5 @@
+---
+borg_version: "1.1.17"
+borg_checksum: "sha1:dbcd359c495b0d73bc7c5d67baa69ad7388c9db9"
+backup_directory: "/mnt/backup"
+config_directory: "/root/borg"
