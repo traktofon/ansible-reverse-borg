@@ -10,58 +10,34 @@ EOF
     exit 1
 }
 
-# load config
+# boilerplate
 MY_DIR=$(dirname $(dirname $(realpath "$0")))
-MY_CONFIG="${MY_DIR}/etc/backup.conf"
-if [ ! -r "${MY_CONFIG}" ]; then
-    echo "ERROR: configuration file '${MY_CONFIG}' missing" >&2
-    exit 1
-fi
-. "${MY_CONFIG}"
-# BACKUP_SERVER
-# BACKUP_SSHKEY
-# BACKUP_CONNECT_WINDOW
-# BACKUP_PRUNE_ARGS
+. "${MY_DIR}/bin/common.sh"
 
+# load server config
+load_config '/etc/backup.conf'
+# the following variables have been set:
+# - BACKUP_SERVER
+# - BACKUP_SSHKEY
+# - BACKUP_CONNECT_WINDOW
+# - BACKUP_PRUNE_ARGS
 
-# parse arguments
-BACKUP_VOLUME="$1"
-[ -z "${BACKUP_VOLUME}" ] && usage
-shift
+parse_args "$@"
+# the following variables have been set:
+# - BACKUP_VOLUME
+# - EXTRA_ARGS
 
-BORG_ARGS="$@"
+# load client/volume config
+load_config "${BACKUP_VOLUME}/config"
+# the following variables have been set:
+# - BACKUP_CLIENT
+# - BACKUP_PORT
+# - BACKUP_USER
+# - BACKUP_SET
+# - BACKUP_REPO
+# - BORG_PASSPHRASE (optional)
 
-
-CLIENT_CONFIG_DIR="${MY_DIR}/${BACKUP_VOLUME}"
-if [ ! -r "${CLIENT_CONFIG_DIR}/config" ]; then
-    echo "ERROR: client configuration in '${CLIENT_CONFIG_DIR}' missing" >&2
-    exit 1
-fi
-
-source "${CLIENT_CONFIG_DIR}/config"
-# BACKUP_CLIENT
-# BACKUP_PORT
-# BACKUP_USER
-# BACKUP_SET
-# BACKUP_REPO
-# BORG_PASSPHRASE (optional)
-
-if [ ! -d "${BACKUP_REPO}" ]; then
-    echo "ERROR: repository '${BACKUP_REPO}' missing" >&2
-    exit 1
-fi
-
-eval $(ssh-agent -s -t "$BACKUP_CONNECT_WINDOW") >/dev/null
-cleanup () { eval $(ssh-agent -k) >/dev/null ; }
-trap cleanup SIGINT SIGTERM EXIT
-ssh-add "${CLIENT_CONFIG_DIR}/id_rsa" 2>/dev/null
-
-export BORG_PASSPHRASE
-export BORG_RSH='ssh -o StrictHostKeyChecking=accept-new'
-$BORG_RSH -o SendEnv='BORG_PASSPHRASE BORG_RSH' \
-  -i "${BACKUP_SSHKEY}" -A \
-  -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}" \
-"borg prune \
-  ${BACKUP_PRUNE_ARGS} ${BORG_ARGS} \
-  '${BACKUP_USER}@${BACKUP_SERVER}:${BACKUP_REPO}'"
+start_ssh_agent
+set_borg_environment
+run_on_client "borg prune ${BACKUP_PRUNE_ARGS} ${EXTRA_ARGS}"
 
