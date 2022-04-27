@@ -52,3 +52,10 @@
     dest: "{{ config_directory }}/{{ item.name }}/patterns"
     force: no
 
+- name: add volume to group config file
+  lineinfile:
+    path: "{{ config_directory }}/etc/ALL.conf"
+    line: "  {{ item.name }}"
+    insertafter: '^VOLUMES='
+    state: present
+

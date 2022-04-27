@@ -45,6 +45,7 @@
         recursive: yes
         links: yes
         perms: yes
+        times: yes
 
     - name: create ssh keypair for logging into the backup clients
       openssh_keypair:
@@ -58,3 +59,8 @@
         src: "templates/backup.conf.j2"
         dest: "{{ config_directory}}/etc/backup.conf"
 
+    - name: set up group config file
+      copy:
+        src: "templates/ALL.conf"
+        dest: "{{ config_directory}}/etc/ALL.conf"
+        force: no
