@@ -24,6 +24,7 @@
   command:
     cmd: "cat {{ config_directory }}/{{ item.name }}/id_rsa.pub"
   changed_when: false
+  check_mode: no
   register: volume_public_key
 
 - name: append volume's public key to backup account's authorized_keys
@@ -37,6 +38,7 @@
   command:
     cmd: 'openssl rand -hex 16'
   changed_when: false
+  check_mode: no
   register: volume_password
 
 - name: set up config file for volume

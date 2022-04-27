@@ -20,6 +20,7 @@
           delegate_facts: true
           changed_when: false
       run_once: true
+      check_mode: no
 
 
 - name: setup for each client, on server
