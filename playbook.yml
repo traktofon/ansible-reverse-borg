@@ -78,3 +78,11 @@
         insertafter: "^AcceptEnv"
         state: present
       notify: reload sshd
+
+    - name: ensure repos are initialized
+      delegate_to: borgsrv
+      loop: "{{ volumes }}"
+      command:
+        chdir: "{{ hostvars['borgsrv'].config_directory }}"
+        cmd: "bin/run-borg {{ item.name }} init -e authenticated-blake2"
+        creates: "{{ hostvars['borgsrv'].backup_directory }}/{{ item.name }}/config"
