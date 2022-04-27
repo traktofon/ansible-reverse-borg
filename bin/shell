@@ -37,9 +37,8 @@ load_config "${BACKUP_VOLUME}/config"
 # - BACKUP_REPO
 # - BORG_PASSPHRASE (optional)
 
-if [ ! -d "${BACKUP_REPO}" ]; then
-    echo "WARNING: repository '${BACKUP_REPO}' missing" >&2
-fi
+# give more time for interactive work
+BACKUP_CONNECT_WINDOW=3600
 
 start_ssh_agent
 set_borg_environment

@@ -10,3 +10,4 @@
     force: yes
     checksum: "{{ borg_checksum }}"
     timeout: 30
+  when: deploy_borg
