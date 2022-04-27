@@ -34,7 +34,6 @@
 
   vars_files:
     - vars/vars.yml
-    - vars/clients.yml
 
   tasks:
     - delegate_to: borgsrv
@@ -48,7 +47,7 @@
 
         - name: perform server tasks for each client volume
           include_tasks: volume-tasks.yml
-          loop: "{{ backup_clients[inventory_hostname].volumes }}"
+          loop: "{{ volumes }}"
 
  
 - name: setup for each client, on client

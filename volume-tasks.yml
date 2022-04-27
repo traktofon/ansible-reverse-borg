@@ -30,7 +30,7 @@
   authorized_key:
     user: "borg-{{ inventory_hostname }}"
     key: "{{ volume_public_key.stdout }}"
-    key_options: 'from="{{ backup_clients[inventory_hostname].address }}",command="borg serve --restrict-to-path {{ backup_directory }}/{{ item.name }}",restrict'
+    key_options: 'from="{{ ansible_host }}",command="borg serve --restrict-to-path {{ backup_directory }}/{{ item.name }}",restrict'
     comment: "{{ item.name }}"
 
 - name: generate random password for volume

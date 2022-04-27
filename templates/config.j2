@@ -1,8 +1,8 @@
 # name or address used to ssh into the client
-BACKUP_CLIENT='{{ backup_clients[inventory_hostname].address }}'
+BACKUP_CLIENT='{{ ansible_host }}'
 
 # client's ssh port
-BACKUP_PORT={{ backup_clients[inventory_hostname].port | default('22') }}
+BACKUP_PORT={{ ansible_port | default('22') }}
 
 # client directories to be backed up (separate by space)
 BACKUP_SET='{{ item.paths }}'
