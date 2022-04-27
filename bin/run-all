@@ -16,7 +16,6 @@ shift
 
 ARGS="$@"
 
-export PATH="$PATH:/usr/local/bin"
 
 # load config
 MY_DIR=$(dirname $(dirname $(realpath "$0")))
@@ -28,6 +27,7 @@ fi
 . "${MY_CONFIG}"
 # VOLUMES
 
+export PATH="${PATH}:${MY_DIR}/bin"
 
 for volume in "${VOLUMES[@]}"; do
    echo -n "### ${volume} backup start at "; date

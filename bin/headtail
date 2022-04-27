@@ -1,0 +1,41 @@
+#!/bin/bash -eu
+# vim: set sw=3 ts=3 et ai :
+
+ntop=100
+nbot=10
+
+usage () {
+   cat <<EOF
+Usage: headtail [ -t NTOP ] [ -b NBOT ]
+Filters stdin and only prints the first NTOP (default: $ntop) and
+last NBOT (default: $nbot) lines. If lines are omitted, an informational
+message is printed between the top and bottom lines.
+EOF
+}
+
+while getopts 't:b:h' opt; do
+   case $opt in
+      t) ntop="$OPTARG"
+         ;;
+      b) nbot="$OPTARG"
+         ;;
+      h) usage
+         exit 0
+         ;;
+   esac
+done
+
+tmpfile=$(mktemp)
+cat > "$tmpfile"
+
+nl=$(wc -l < "$tmpfile")
+if [ $nl -le $(( ntop + nbot )) ]; then
+   cat "$tmpfile"
+else
+   head -n "$ntop" "$tmpfile"
+   nskip=$(( nl - ntop - nbot ))
+   echo "[... skipped ${nskip} lines ...]"
+   tail -n "$nbot" "$tmpfile"
+fi
+
+rm -f "$tmpfile"
