@@ -27,6 +27,13 @@
 #     identifier that must be unique across the server) and a 'paths'
 #     setting (space-separated list of paths to be backed up into this
 #     repository).
+#   - deploy_borg (optional):
+#     Boolean to control whether to deploy the borg binary or not.
+#     Defaults to true.
+#   - ssh_opts (optional):
+#     To override the ssh options that the client uses to connect to
+#     the server. E.g. for older machines, may need to be set to
+#     "-o StrictHostKeyChecking=no".
 ---
 all:
   children:

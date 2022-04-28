@@ -47,6 +47,7 @@ set_borg_environment () {
    # - BACKUP_USER: from volume config
    # - BACKUP_SERVER: from server config or volume config
    # - BACKUP_REPO: from volume config
+   # - BACKUP_CLIENT_SSH_OPTS: from server config or volume config
    # - BORG_PASSPHRASE: from volume config
    # exported variables:
    # - BORG_REPO: location of repo from client's view
@@ -54,7 +55,7 @@ set_borg_environment () {
    # - BORG_RSH: ssh command to connect to server
    export BORG_REPO="${BACKUP_USER}@${BACKUP_SERVER}:${BACKUP_REPO}"
    export BORG_PASSPHRASE
-   export BORG_RSH='ssh -o StrictHostKeyChecking=accept-new'
+   export BORG_RSH="ssh ${BACKUP_CLIENT_SSH_OPTS}"
 }
 
 
@@ -66,7 +67,7 @@ run_on_client () {
    # - BACKUP_SSHKEY: from server config
    # positional parameters:
    # * all get passed to the client
-   $BORG_RSH -o SendEnv='BORG_*' \
+   ssh -o StrictHostKeyChecking='accept-new' -o SendEnv='BORG_*' \
       -i "${BACKUP_SSHKEY}" -A \
       -p "${BACKUP_PORT}" "root@${BACKUP_CLIENT}" \
       "$@"

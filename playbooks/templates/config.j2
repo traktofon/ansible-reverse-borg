@@ -16,3 +16,8 @@ BORG_PASSPHRASE='{{ volume_password.stdout }}'
 # path where the borg repository is stored on this machine
 BACKUP_REPO="{{ backup_directory }}/{{ item.name }}"
 
+{% if ssh_opts is defined %}
+# Override the ssh options on the client
+BACKUP_CLIENT_SSH_OPTS="{{ ssh_opts }}"
+
+{% endif %}
