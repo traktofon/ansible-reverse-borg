@@ -1,0 +1,62 @@
+# This is a sample inventory file, to go along with the sample lxd provisioner.
+#
+# The inventory should be structured as follows:
+# - Group 'servers':
+#   Only a single server is supported. Its inventory name must be 'borgsrv'.
+#   Set 'ansible_host' to its actual name/ip.
+#   The following host variables should be set:
+#   - backup_operator_account:
+#     The user that owns the backup config for all clients, and will
+#     initiate backups in day-to-day operations. Could be 'root'.
+#   - config_directory:
+#     The directory where the config files and scripts are stored.
+#   - backup_directory:
+#     The directory where all the backups will be stored.
+#
+# - Group 'clients':
+#   One host entry for each machine to be backed up. Its inventory name
+#   should be a short (but unique) nickname, which will be used for
+#   various automatically created entities (e.g. user accounts on borgsrv).
+#   Set 'ansible_host' to its actual name/ip.i
+#   Set 'ansible_port' if its not the standard 22.
+#   The following host variables should be set:
+#   - volumes:
+#     A list of separate backup "volumes" which might have different
+#     backup schedules or retention policies etc. Each volume will be
+#     stored in its own borg repository. A volume has a 'name' (an
+#     identifier that must be unique across the server) and a 'paths'
+#     setting (space-separated list of paths to be backed up into this
+#     repository).
+---
+all:
+  children:
+    servers:
+      hosts:
+        borgsrv:
+          ansible_host: 192.168.200.10
+          backup_operator_account: borgadm
+          config_directory: "/home/borgadm/backup-config"
+          backup_directory: "/mnt/backup"
+
+    clients:
+      hosts:
+
+        c01:
+          ansible_host: 192.168.200.20
+          volumes:
+            - name: c01-etc
+              paths: "/etc"
+            - name: c01-var
+              paths: "/var"
+
+        c02:
+          ansible_host: 192.168.200.21
+          volumes:
+            - name: c02
+              paths: "/etc /home"
+
+  vars:
+    ansible_user: ops
+    ansible_private_key_file: /home/frank/test/ansible/sshid
+    ansible_python_interpreter: /usr/bin/python3
+
