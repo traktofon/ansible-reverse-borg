@@ -65,7 +65,7 @@
       authorized_key:
         user: root
         key: "{{ hostvars['borgsrv'].server_public_key }}"
-        key_options: "from=\"{{ hostvars['borgsrv'].ansible_host }}\",restrict,agent-forwarding,pty"
+        key_options: "from=\"{{ hostvars['borgsrv'].ansible_host }}\",{{ ssh_key_restrictions | default('restrict,agent-forwarding,pty') }}"
         comment: "{{ hostvars['borgsrv'].backup_operator_account }}@{{ hostvars['borgsrv'].ansible_host }}"
 
     - name: allow BORG environment variables to be passed via ssh

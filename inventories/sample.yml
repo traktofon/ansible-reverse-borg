@@ -34,6 +34,11 @@
 #     To override the ssh options that the client uses to connect to
 #     the server. E.g. for older machines, may need to be set to
 #     "-o StrictHostKeyChecking=no".
+#   - ssh_key_restrictions (optional):
+#     The restrict clauses to put on the server's public key on the
+#     client side. Default is "restrict,agent-forwarding,pty". May need
+#     to be changed for older machines. "agent-forwarding" is strictly
+#     needed. "pty" is needed only for shell access.
 ---
 all:
   children:
