@@ -1,0 +1,15 @@
+# playbook for migrating existing client/volume configs from the
+# root account to the dedicated operator account
+---
+- name: migrate each volume, on the server
+  hosts: clients
+  gather_facts: no
+  become: yes
+  serial: 1
+
+  tasks:
+    - delegate_to: borgsrv
+      block:
+        - name: perform migration tasks for each volume
+          include_tasks: migrate-tasks.yml
+          loop: "{{ volumes }}"

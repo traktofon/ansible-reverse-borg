@@ -1,0 +1,27 @@
+---
+- name: migrate patterns file
+  copy:
+    remote_src: true
+    src: "/root/borg/{{ item.name }}/patterns"
+    dest: "{{ hostvars['borgsrv'].config_directory }}/volumes/{{ item.name }}/patterns"
+    owner: "{{ hostvars['borgsrv'].backup_operator_account }}"
+    group: "{{ hostvars['borgsrv'].backup_operator_account }}"
+    force: yes
+
+- name: record existing passphrase
+  shell:
+    cmd: ". /root/borg/{{ item.name }}/config && echo $BORG_PASSPHRASE"
+  register: passphrase
+  changed_when: false
+  check_mode: no
+
+- name: set passphrase in migrated config file
+  lineinfile:
+    path: "{{ hostvars['borgsrv'].config_directory }}/volumes/{{ item.name }}/config"
+    regexp: '^BORG_PASSPHRASE='
+    line: "BORG_PASSPHRASE='{{ passphrase.stdout }}'"
+    state: present
+    owner: "{{ hostvars['borgsrv'].backup_operator_account }}"
+    group: "{{ hostvars['borgsrv'].backup_operator_account }}"
+    mode: '0600'
+
