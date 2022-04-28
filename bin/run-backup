@@ -41,7 +41,8 @@ start_ssh_agent
 set_borg_environment
 
 # copy exclude patterns to client
-scp -q -i "${BACKUP_SSHKEY}" \
+scp -o StrictHostKeyChecking='accept-new' \
+    -q -i "${BACKUP_SSHKEY}" \
     -P "${BACKUP_PORT}" \
     "${MY_DIR}/${BACKUP_VOLUME}/patterns" \
     "root@${BACKUP_CLIENT}:/tmp/${BACKUP_VOLUME}.patterns" 

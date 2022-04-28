@@ -76,6 +76,9 @@
         state: present
       notify: reload sshd
 
+    - name: ensure sshd runs with updated config
+      meta: flush_handlers
+
     - name: ensure repos are initialized
       delegate_to: borgsrv
       loop: "{{ volumes }}"
