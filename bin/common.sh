@@ -1,4 +1,4 @@
-# vim: set ft=sh :
+# vim: set ft=sh : # bash
 
 load_config () {
    # global parameters:
@@ -9,12 +9,12 @@ load_config () {
    # - MY_CONFIG: absolete path to config file
    # - all variables from MY_CONFIG
    local path="$1"
-   MY_CONFIG="${MY_DIR}/${path}"
-   if [ ! -r "${MY_CONFIG}" ]; then
-      echo "ERROR: configuration file '${MY_CONFIG}' missing" >&2
+   local config="${MY_DIR}/${path}"
+   if [ ! -r "${config}" ]; then
+      echo "ERROR: configuration file '${config}' missing" >&2
       exit 1
    fi
-   . "${MY_CONFIG}"
+   . "${config}"
 }
 
 
@@ -23,6 +23,9 @@ parse_args () {
    # - BACKUP_VOLUME: the backup volume to process
    # - EXTRA_ARGS: all remaining cmdline arguments, passed to client
    BACKUP_VOLUME="$1"
+   # remove leading and trailing noise
+   BACKUP_VOLUME="${BACKUP_VOLUME#volumes/}"
+   BACKUP_VOLUME="${BACKUP_VOLUME%/}"
    [ -z "${BACKUP_VOLUME}" ] && usage
    shift
    EXTRA_ARGS="$@"
@@ -38,7 +41,7 @@ start_ssh_agent () {
    # - BACKUP_CONNECT_WINDOW: lifetime of added keys
    eval $(ssh-agent -s -t "$BACKUP_CONNECT_WINDOW") >/dev/null
    trap cleanup EXIT
-   ssh-add "${MY_DIR}/${BACKUP_VOLUME}/id_rsa" 2>/dev/null
+   ssh-add "${MY_DIR}/volumes/${BACKUP_VOLUME}/id_rsa" 2>/dev/null
 }
 
 

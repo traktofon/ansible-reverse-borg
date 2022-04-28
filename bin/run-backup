@@ -28,7 +28,7 @@ parse_args "$@"
 # - EXTRA_ARGS
 
 # load client/volume config
-load_config "${BACKUP_VOLUME}/config"
+load_config "volumes/${BACKUP_VOLUME}/config"
 # the following variables have been set:
 # - BACKUP_CLIENT
 # - BACKUP_PORT
@@ -44,7 +44,7 @@ set_borg_environment
 scp -o StrictHostKeyChecking='accept-new' \
     -q -i "${BACKUP_SSHKEY}" \
     -P "${BACKUP_PORT}" \
-    "${MY_DIR}/${BACKUP_VOLUME}/patterns" \
+    "${MY_DIR}/volumes/${BACKUP_VOLUME}/patterns" \
     "root@${BACKUP_CLIENT}:/tmp/${BACKUP_VOLUME}.patterns" 
 
 run_on_client \

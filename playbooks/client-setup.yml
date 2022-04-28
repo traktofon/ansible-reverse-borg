@@ -9,7 +9,7 @@
       delegate_to: borgsrv
       block:
         - command:
-            cmd: "cat {{ hostvars['borgsrv'].config_directory }}/sshid_borg.pub"
+            cmd: "cat {{ hostvars['borgsrv'].config_directory }}/etc/sshid_borg.pub"
           register: ssh_public_key
           changed_when: false
         - set_fact:

@@ -10,14 +10,14 @@
 
 - name: create config directory for volume
   file:
-    path: "{{ config_directory }}/{{ item.name }}"
+    path: "{{ config_directory }}/volumes/{{ item.name }}"
     owner: "{{ backup_operator_account }}"
     group: "{{ backup_operator_account }}"
     state: directory
 
 - name: create ssh keypair for volume
   openssh_keypair:
-    path: "{{ config_directory }}/{{ item.name }}/id_rsa"
+    path: "{{ config_directory }}/volumes/{{ item.name }}/id_rsa"
     owner: "{{ backup_operator_account }}"
     group: "{{ backup_operator_account }}"
     type: rsa
@@ -26,7 +26,7 @@
 
 - name: register volume's public key
   command:
-    cmd: "cat {{ config_directory }}/{{ item.name }}/id_rsa.pub"
+    cmd: "cat {{ config_directory }}/volumes/{{ item.name }}/id_rsa.pub"
   changed_when: false
   check_mode: no
   register: volume_public_key
@@ -48,7 +48,7 @@
 - name: set up config file for volume
   template:
     src: templates/config.j2
-    dest: "{{ config_directory }}/{{ item.name }}/config"
+    dest: "{{ config_directory }}/volumes/{{ item.name }}/config"
     owner: "{{ backup_operator_account }}"
     group: "{{ backup_operator_account }}"
     mode: '0600'
@@ -57,14 +57,14 @@
 - name: set up default exclude patterns for volume
   copy:
     src: templates/patterns
-    dest: "{{ config_directory }}/{{ item.name }}/patterns"
+    dest: "{{ config_directory }}/volumes/{{ item.name }}/patterns"
     owner: "{{ backup_operator_account }}"
     group: "{{ backup_operator_account }}"
     force: no
 
 - name: add volume to group config file
   lineinfile:
-    path: "{{ config_directory }}/etc/ALL.conf"
+    path: "{{ config_directory }}/groups/ALL.conf"
     line: "  {{ item.name }}"
     insertafter: '^VOLUMES='
     state: present

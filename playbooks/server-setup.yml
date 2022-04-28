@@ -44,6 +44,8 @@
       loop:
         - "{{ config_directory }}"
         - "{{ config_directory }}/etc"
+        - "{{ config_directory }}/volumes"
+        - "{{ config_directory }}/groups"
 
     - name: copy bin directory to server
       synchronize:
@@ -55,7 +57,7 @@
 
     - name: create ssh keypair for logging into the backup clients
       openssh_keypair:
-        path: "{{ config_directory }}/sshid_borg"
+        path: "{{ config_directory }}/etc/sshid_borg"
         owner: "{{ backup_operator_account }}"
         group: "{{ backup_operator_account }}"
         type: rsa
@@ -72,7 +74,7 @@
     - name: set up group config file
       copy:
         src: "templates/ALL.conf"
-        dest: "{{ config_directory}}/etc/ALL.conf"
+        dest: "{{ config_directory}}/groups/ALL.conf"
         owner: "{{ backup_operator_account }}"
         group: "{{ backup_operator_account }}"
         force: no

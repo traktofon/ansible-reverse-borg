@@ -6,7 +6,7 @@
 BACKUP_SERVER='{{ ansible_host }}'
 
 # path to ssh key which is used to log in to the client
-BACKUP_SSHKEY='{{ config_directory }}/sshid_borg'
+BACKUP_SSHKEY='{{ config_directory }}/etc/sshid_borg'
 
 # time window for allowing the client to connect back to the server (seconds)
 BACKUP_CONNECT_WINDOW=60

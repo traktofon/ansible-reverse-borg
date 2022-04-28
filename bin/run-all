@@ -20,7 +20,7 @@ shift
 ARGS=("$@")
 
 # load group config
-load_config "etc/${GROUP}.conf"
+load_config "groups/${GROUP}.conf"
 # the following variables have been set:
 # - VOLUMES [array]
 

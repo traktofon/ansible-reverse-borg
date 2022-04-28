@@ -28,7 +28,7 @@ parse_args "$@"
 # - EXTRA_ARGS
 
 # load client/volume config
-load_config "${BACKUP_VOLUME}/config"
+load_config "volumes/${BACKUP_VOLUME}/config"
 # the following variables have been set:
 # - BACKUP_CLIENT
 # - BACKUP_PORT
