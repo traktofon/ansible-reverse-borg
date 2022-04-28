@@ -39,6 +39,8 @@
 #     client side. Default is "restrict,agent-forwarding,pty". May need
 #     to be changed for older machines. "agent-forwarding" is strictly
 #     needed. "pty" is needed only for shell access.
+#   - ssh_service_name (optional):
+#     The name of the sshd service. Default is "sshd".
 ---
 all:
   children:

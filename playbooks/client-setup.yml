@@ -57,7 +57,7 @@
   handlers:
     - name: reload sshd
       service:
-        name: sshd
+        name: "{{ ssh_service_name | default('sshd') }}"
         state: reloaded
 
   tasks:
