@@ -1,0 +1,70 @@
+# This is a sample playbook that provisions some LXD containers
+# into which this repo's reverse-borg setup can be deployed. The
+# associated inventory file can be found in sample/hosts.yml.
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    # Adjust IP addresses as necessary, using the subnet
+    # of your LXD network.
+    instances:
+      - name: borgsrv
+        ip: 10.10.10.101
+      - name: c01
+        ip: 10.10.10.102
+      - name: c02
+        ip: 10.10.10.103
+
+  tasks:
+    - name: create lxd profile with cloud-init settings
+      lxd_profile:
+        name: ops-cloud
+        state: present
+        description: profile with cloud-init settings
+        devices:
+          eth0:
+            name: eth0
+            network: lxdbr0
+            type: nic
+          root:
+            path: /
+            pool: default
+            type: disk
+        config:
+          user.user-data: |
+            #cloud-config
+            users:
+              - name: ops
+                gecos: Operations Account
+                ssh_authorized_keys:
+                  - "{{ lookup('file', (cloud_private_key_file + '.pub')) }}"
+                sudo: ALL=(ALL) NOPASSWD:ALL
+                shell: /bin/bash
+            package_upgrade: true
+            packages:
+              - openssh-server
+
+    - name: create lxd containers
+      loop: "{{ instances }}"
+      lxd_container:
+        name: "{{ item.name }}"
+        source:
+          type: image
+          mode: pull
+          server: "https://images.linuxcontainers.org"
+          protocol: simplestreams
+          alias: "debian/10/cloud"
+        profiles:
+          - ops-cloud
+        devices:
+          eth0:
+            ipv4.address: "{{ item.ip }}"
+            name: eth0
+            network: lxdbr0
+            type: nic
+        state: started
+        wait_for_ipv4_addresses: true
+        timeout: 60
+
