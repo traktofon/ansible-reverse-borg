@@ -36,6 +36,9 @@ Here, the following approach is used:
   if different files need different backup schedules or retention policies.
   Technically, each volume will get stored in its own Borg repository.
 
+Ansible is used here to deploy Borg, some scripts, and configuration to
+the backup server and the clients. Ansible is not used (nor needed) to
+perform the backups and related tasks.
 
 ## Demonstration
 
