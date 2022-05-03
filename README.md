@@ -121,7 +121,7 @@ You'll get a warning about a "previously unknown unencrypted repository", which 
 correct, as the reinstalled client hasn't interacted with this repository yet.
 Answer "y" to indicate that you trust this repository.
 
-Select the archive with the latest timestamp (in `yyyy-mm-dd-HHMM` format),
+Select the archive with the latest timestamp (in `yyyy-mm-dd_HHMM` format),
 and restore the data as usual with `borg extract` (see the
 [Borg documentation](https://borgbackup.readthedocs.io/en/stable/usage/extract.html)
 for details):
@@ -156,6 +156,7 @@ There must be two inventory groups, `servers` and `clients`.
   - `backup_directory`:
     The directory where all the backup repositories will be stored.
     Should be on a filesystem with sufficient space.
+
   The account and directories will be created during server deployment
   via Ansible.
 
@@ -375,7 +376,7 @@ with a short lifetime, by default 60 seconds. This is set in the server
 configuration file `etc/backup.conf` and can be overriden per volume
 in the file `volumes/.../config` via the variable `BACKUP_CONNECT_WINDOW`.
 It may be necessary to increase this window for clients that have slow
-drives and tend to suffer from I/O load, as under such conditions starting
+drives and tend to suffer from high I/O load, as under such conditions starting
 all required processes on the client may take longer than 60 seconds.
 **Note**: As the `bin/shell` script is intended for interactive use, it
 sets `BACKUP_CONNECT_WINDOW` to one hour.
