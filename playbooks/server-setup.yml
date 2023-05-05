@@ -48,12 +48,12 @@
         - "{{ config_directory }}/groups"
 
     - name: copy bin directory to server
-      synchronize:
-        src: "../bin"
-        dest: "{{ config_directory }}/"
-        archive: yes
-        rsync_opts:
-          - "--chown={{ backup_operator_account }}:{{ backup_operator_account }}"
+      copy:
+        src: "../bin/"
+        dest: "{{ config_directory }}/bin/"
+        owner: "{{ backup_operator_account }}"
+        group: "{{ backup_operator_account }}"
+        mode: "preserve"
 
     - name: create ssh keypair for logging into the backup clients
       openssh_keypair:
